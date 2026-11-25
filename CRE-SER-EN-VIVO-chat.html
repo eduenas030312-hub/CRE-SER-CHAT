@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chat TIEMPO DE CRE-SER</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{font-family:Arial,sans-serif;color:#17231f;background:#fff}
+*{box-sizing:border-box}
+body{margin:0}
+.chat{height:100dvh;min-height:360px;display:flex;flex-direction:column;background:#fff;border:1px solid #e5e7eb}
+.head{padding:13px 15px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.brand{font-weight:700;font-size:15px}
+.status{font-size:11px;color:#17834e;white-space:nowrap}
+#messages{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:94%;background:#f1f5f3;border-radius:12px;padding:9px 11px;overflow-wrap:anywhere}
+.msg .name{font-size:11px;font-weight:700;color:#176344;margin-bottom:4px}
+.msg .body{font-size:14px;line-height:1.4;white-space:pre-wrap}
+.msg .time{font-size:10px;color:#718078;margin-top:5px;text-align:right}
+.empty{margin:auto;text-align:center;color:#78857e;font-size:13px;padding:20px}
+form{border-top:1px solid #e5e7eb;padding:10px;display:flex;gap:7px}
+input{min-width:0;border:1px solid #d6ddd9;border-radius:9px;padding:11px;font-size:14px;outline:none}
+#name{width:31%;max-width:115px}
+#message{flex:1}
+button{border:0;border-radius:9px;background:#087a4b;color:#fff;font-weight:700;padding:0 14px;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+.note{font-size:10px;color:#89938e;padding:0 12px 8px}
+@media(max-width:420px){#name{width:29%;font-size:12px;padding:9px}#message{font-size:13px;padding:9px}button{padding:0 11px}}
+</style>
+</head>
+<body>
+<section class="chat">
+  <header class="head">
+    <div class="brand">TIEMPO DE CRE-SER · Chat en vivo</div>
+    <div class="status" id="status">Conectando…</div>
+  </header>
+  <main id="messages" aria-live="polite"><div class="empty">Cargando conversación…</div></main>
+  <form id="form">
+    <input id="name" maxlength="32" minlength="2" placeholder="Tu nombre" aria-label="Tu nombre" required>
+    <input id="message" maxlength="500" placeholder="Escribe un mensaje…" aria-label="Escribe un mensaje" required>
+    <button id="send" type="submit" aria-label="Enviar">➤</button>
+  </form>
+  <div class="note">Conversemos con respeto. Máximo 500 caracteres por mensaje.</div>
+</section>
+<script>
+(() => {
+  // REEMPLAZA estos dos valores por los de Supabase > Project Settings > API.
+  const SUPABASE_URL = "https://qvjbaiuydxcvgnxvaudl.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_sytKjRRv8mfMp3vlQbgNmQ_PsIlU5EO";
+
+  const statusEl = document.getElementById("status");
+  const list = document.getElementById("messages");
+  const form = document.getElementById("form");
+  const nameInput = document.getElementById("name");
+  const messageInput = document.getElementById("message");
+  const sendButton = document.getElementById("send");
+  const seen = new Set();
+  let client;
+
+  nameInput.value = localStorage.getItem("creser-chat-name") || "";
+
+  function safeText(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c =>
+      ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+  }
+  function addMessage(row) {
+    if (!row || seen.has(row.id)) return;
+    seen.add(row.id);
+    const empty = list.querySelector(".empty");
+    if (empty) empty.remove();
+    const item = document.createElement("article");
+    item.className = "msg";
+    const date = new Date(row.created_at);
+    item.innerHTML =
+      '<div class="name">' + safeText(row.display_name) + '</div>' +
+      '<div class="body">' + safeText(row.body) + '</div>' +
+      '<div class="time">' + date.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}) + '</div>';
+    list.appendChild(item);
+    while (list.children.length > 100) list.removeChild(list.firstChild);
+    list.scrollTop = list.scrollHeight;
+  }
+
+  async function start() {
+    if (!window.supabase || SUPABASE_URL.startsWith("PEGA_") || SUPABASE_ANON_KEY.startsWith("PEGA_")) {
+      statusEl.textContent = "Falta configurar Supabase";
+      list.innerHTML = '<div class="empty">Hay que colocar la URL y la clave pública de Supabase en este archivo.</div>';
+      return;
+    }
+    client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const {data,error} = await client.from("live_chat_messages")
+      .select("id,display_name,body,created_at").order("created_at",{ascending:true}).limit(100);
+    if (error) throw error;
+    list.innerHTML = "";
+    (data || []).forEach(addMessage);
+    statusEl.textContent = "En vivo";
+    client.channel("creser-live-chat")
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"live_chat_messages"},payload => addMessage(payload.new))
+      .subscribe(state => {
+        statusEl.textContent = state === "SUBSCRIBED" ? "En vivo" : "Reconectando…";
+      });
+  }
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    const display_name = nameInput.value.trim().replace(/\s+/g," ");
+    const body = messageInput.value.trim();
+    if (display_name.length < 2 || display_name.length > 32 || !body || body.length > 500) return;
+    if (!client) return;
+    sendButton.disabled = true;
+    try {
+      const {error} = await client.from("live_chat_messages").insert({display_name,body});
+      if (error) throw error;
+      localStorage.setItem("creser-chat-name",display_name);
+      messageInput.value = "";
+      messageInput.focus();
+    } catch (error) {
+      alert("No se pudo enviar el mensaje: " + (error.message || "intenta de nuevo"));
+    } finally {
+      sendButton.disabled = false;
+    }
+  });
+
+  start().catch(error => {
+    console.error(error);
+    statusEl.textContent = "Error de conexión";
+    list.innerHTML = '<div class="empty">No se pudo conectar. Revisa la configuración y las tablas de Supabase.</div>';
+  });
+})();
+</script>
+</body>
+</html>
