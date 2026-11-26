@@ -1,0 +1,174 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TIEMPO DE CRE-SER | OBS</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#overlay {
+  position: absolute;
+  left: 50%;
+  bottom: 7%;
+  transform: translateX(-50%);
+  width: min(90%, 1100px);
+  display: none;
+  animation: aparecer .35s ease-out;
+}
+
+#overlay.visible {
+  display: block;
+}
+
+.message-card {
+  background: rgba(17, 35, 48, .94);
+  border: 2px solid rgba(255,255,255,.85);
+  border-radius: 18px;
+  padding: 24px 32px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.35);
+  text-align: center;
+}
+
+.name {
+  color: #8ee6c0;
+  font-size: 25px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  letter-spacing: .5px;
+}
+
+.body {
+  color: #ffffff;
+  font-size: 34px;
+  line-height: 1.3;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 700px) {
+  .message-card {
+    padding: 16px 20px;
+  }
+
+  .name {
+    font-size: 19px;
+  }
+
+  .body {
+    font-size: 25px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="overlay">
+  <div class="message-card">
+    <div class="name" id="displayName"></div>
+    <div class="body" id="messageBody"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://qvjbaiuydxcvgnxvaudl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_sytKjRRv8mfMp3vlQbgNmQ_PsIlU5EO";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const overlay = document.getElementById("overlay");
+const displayName = document.getElementById("displayName");
+const messageBody = document.getElementById("messageBody");
+
+function showMessage(data) {
+  if (!data || !data.is_visible) {
+    overlay.classList.remove("visible");
+    return;
+  }
+
+  displayName.textContent = data.display_name || "Participante";
+  messageBody.textContent = data.body || "";
+
+  overlay.classList.remove("visible");
+
+  requestAnimationFrame(() => {
+    overlay.classList.add("visible");
+  });
+}
+
+async function loadFeatured() {
+  const { data, error } = await db
+    .from("live_chat_featured")
+    .select("slot, display_name, body, is_visible")
+    .eq("slot", 1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error al cargar mensaje destacado:", error);
+    return;
+  }
+
+  showMessage(data);
+}
+
+async function startRealtime() {
+  db.channel("obs-featured-message")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "live_chat_featured",
+        filter: "slot=eq.1"
+      },
+      (payload) => {
+        showMessage(payload.new);
+      }
+    )
+    .subscribe((status) => {
+      console.log("Estado de conexión OBS:", status);
+    });
+}
+
+async function init() {
+  await loadFeatured();
+  await startRealtime();
+}
+
+init();
+</script>
+
+</body>
+</html>
