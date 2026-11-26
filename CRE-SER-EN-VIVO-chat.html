@@ -18,8 +18,8 @@ body{margin:0}
 #messages{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
 .msg{max-width:85%;background:#f1f5f3;border-radius:12px;padding:9px 11px;overflow-wrap:anywhere;align-self:flex-start}
 .msg.mine{align-self:flex-end;background:#dff3e7}
-.msg .name{font-size:11px;font-weight:700;color:#176344;margin-bottom:4px}
-.msg.mine .name{text-align:right;color:#087a4b}
+.msg .name{font-size:11px;font-weight:700;margin-bottom:4px}
+.msg.mine .name{text-align:right}
 .msg .body{font-size:14px;line-height:1.4;white-space:pre-wrap}
 .msg .time{font-size:10px;color:#718078;margin-top:5px;text-align:right}
 .empty{margin:auto;text-align:center;color:#78857e;font-size:13px;padding:20px}
@@ -60,7 +60,7 @@ button:disabled{opacity:.55;cursor:wait}
 <button id="send" type="submit" aria-label="Enviar">➤</button>
 </form>
 
-<div class="note">Conversemos con respeto. Máximo 100 caracteres por mensaje.</div>
+<div class="note">Enter para enviar · Shift + Enter para nueva línea · Máximo 100 caracteres.</div>
 </section>
 
 <div id="nameDialog">
@@ -95,15 +95,49 @@ let senderId = localStorage.getItem(STORAGE_ID) || "";
 let client;
 const seen = new Set();
 
+const COLORS = [
+ "#2876C7",
+ "#A04DB5",
+ "#D16A28",
+ "#16834B",
+ "#B04464",
+ "#6473C5",
+ "#98701C",
+ "#168A91",
+ "#8B55A2",
+ "#477B36"
+];
+
 function safeText(value) {
  return String(value ?? "").replace(/[&<>"']/g,c =>
  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
 }
 
+// Asigna un color estable a cada participante.
+function participantColor(row) {
+ const key = String(row.sender_id || row.display_name || "participante");
+ let hash = 0;
+
+ for(let i=0;i<key.length;i++){
+  hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0;
+ }
+
+ return COLORS[Math.abs(hash) % COLORS.length];
+}
+
 function updateCounter(){
  counter.textContent = messageInput.value.length + "/100";
 }
+
 messageInput.addEventListener("input",updateCounter);
+
+// Enter envía; Shift + Enter inserta un salto de línea.
+messageInput.addEventListener("keydown",event=>{
+ if(event.key === "Enter" && !event.shiftKey && !event.isComposing){
+  event.preventDefault();
+  form.requestSubmit();
+ }
+});
 
 function addMessage(row){
  if(!row || seen.has(row.id)) return;
@@ -114,20 +148,27 @@ function addMessage(row){
 
  const item = document.createElement("article");
  const mine = row.sender_id && row.sender_id === senderId;
+ const color = participantColor(row);
+
  item.className = "msg" + (mine ? " mine" : "");
 
  const date = new Date(row.created_at);
+
  item.innerHTML =
- '<div class="name">' + safeText(row.display_name) + '</div>' +
+ '<div class="name" style="color:' + color + '">' +
+ safeText(row.display_name) + '</div>' +
  '<div class="body">' + safeText(row.body) + '</div>' +
- '<div class="time">' + date.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}) + '</div>';
+ '<div class="time">' +
+ date.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}) +
+ '</div>';
 
  list.appendChild(item);
  list.scrollTop = list.scrollHeight;
 }
 
 function showEmpty(){
- list.innerHTML = '<div class="empty">¡Bienvenidos! Iniciemos nuestra conversación.</div>';
+ list.innerHTML =
+ '<div class="empty">¡Bienvenidos! Iniciemos nuestra conversación.</div>';
 }
 
 async function start(){
@@ -138,20 +179,22 @@ async function start(){
 
  client = window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
- // No se carga el historial anterior: la prueba comienza visualmente limpia.
+ // La prueba comienza sin cargar el historial anterior.
  showEmpty();
 
- const channel = client.channel("creser-live-chat")
+ client.channel("creser-live-chat")
  .on("postgres_changes",
  {event:"INSERT",schema:"public",table:"live_chat_messages"},
  payload => addMessage(payload.new))
  .subscribe(state=>{
-  statusEl.textContent = state === "SUBSCRIBED" ? "En vivo" : "Reconectando…";
+  statusEl.textContent =
+   state === "SUBSCRIBED" ? "En vivo" : "Reconectando…";
  });
 }
 
 saveName.addEventListener("click",()=>{
  const value = nameInput.value.trim().replace(/\s+/g," ");
+
  if(value.length < 2 || value.length > 32){
   alert("Escribe un nombre de entre 2 y 32 caracteres.");
   return;
@@ -164,6 +207,7 @@ saveName.addEventListener("click",()=>{
  localStorage.setItem(STORAGE_ID,senderId);
 
  dialog.style.display = "none";
+
  start().catch(error=>{
   console.error(error);
   statusEl.textContent = "Error de conexión";
@@ -172,6 +216,7 @@ saveName.addEventListener("click",()=>{
 
 if(displayName && senderId){
  dialog.style.display = "none";
+
  start().catch(error=>{
   console.error(error);
   statusEl.textContent = "Error de conexión";
@@ -185,6 +230,7 @@ form.addEventListener("submit",async event=>{
  event.preventDefault();
 
  const body = messageInput.value.trim();
+
  if(!body || body.length > 100 || !client || !senderId) return;
 
  sendButton.disabled = true;
@@ -197,12 +243,14 @@ form.addEventListener("submit",async event=>{
   });
 
   if(error) throw error;
+
   messageInput.value = "";
   updateCounter();
   messageInput.focus();
 
  }catch(error){
-  alert("No se pudo enviar el mensaje: " + (error.message || "intenta de nuevo"));
+  alert("No se pudo enviar el mensaje: " +
+   (error.message || "intenta de nuevo"));
  }finally{
   sendButton.disabled = false;
  }
