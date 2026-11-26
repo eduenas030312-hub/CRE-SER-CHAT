@@ -9,357 +9,510 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-* {
-  box-sizing: border-box;
+*{
+ box-sizing:border-box;
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  background: transparent !important;
-  overflow: hidden;
-  font-family: Arial, Helvetica, sans-serif;
+html,body{
+ margin:0;
+ padding:0;
+ width:100%;
+ height:100%;
+ background:transparent !important;
+ overflow:hidden;
+ font-family:Arial,Helvetica,sans-serif;
 }
 
-#overlay {
-  position: absolute;
-  left: 50%;
-  bottom: 7%;
-  transform: translateX(-50%);
-  width: fit-content;
-  max-width: 90%;
-  display: none;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 9px;
+/* CONTENEDOR PRINCIPAL */
+#overlay{
+ position:absolute;
+ bottom:7%;
+ width:fit-content;
+ max-width:90%;
+ display:none;
+ flex-direction:column;
+ align-items:center;
+ gap:9px;
 }
 
-#overlay.visible {
-  display: flex;
+#overlay.visible{
+ display:flex;
 }
 
-#overlay.animation-slide.visible {
-  animation: aparecer .35s ease-out;
+/* ALINEACIÓN HORIZONTAL DEL BLOQUE */
+#overlay.position-left{
+ left:5%;
+ right:auto;
+ transform:none;
+ align-items:flex-start;
 }
 
-#overlay.animation-fade.visible {
-  animation: desvanecer .5s ease-out;
+#overlay.position-center{
+ left:50%;
+ right:auto;
+ transform:translateX(-50%);
+ align-items:center;
 }
 
-#overlay.animation-none.visible {
-  animation: none;
+#overlay.position-right{
+ left:auto;
+ right:5%;
+ transform:none;
+ align-items:flex-end;
 }
 
-.name {
-  background: #8ee6c0;
-  color: #173b35;
-  font-size: 23px;
-  font-weight: 800;
-  padding: 11px 22px;
-  border-radius: 12px;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  box-shadow: 0 5px 15px rgba(0,0,0,.25);
-  letter-spacing: .4px;
+/* POSICIÓN DEL NOMBRE */
+#overlay.name-top{
+ flex-direction:column;
 }
 
-.message-card {
-  background: rgba(17, 35, 48, .96);
-  border: 2px solid rgba(255,255,255,.85);
-  border-radius: 16px;
-  padding: 20px 26px;
-  width: fit-content;
-  max-width: 100%;
-  box-shadow: 0 8px 30px rgba(0,0,0,.35);
+#overlay.name-bottom{
+ flex-direction:column-reverse;
 }
 
-.body {
-  color: #ffffff;
-  font-size: 34px;
-  line-height: 1.3;
-  font-weight: 600;
-  text-align: left;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
+#overlay.name-left{
+ flex-direction:row;
+ align-items:center;
 }
 
-@keyframes aparecer {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
+#overlay.name-right{
+ flex-direction:row-reverse;
+ align-items:center;
 }
 
-@keyframes desvanecer {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+#overlay.name-center{
+ flex-direction:column;
 }
 
-@media (max-width: 700px) {
-  .name {
-    padding: 9px 16px;
-  }
+/* NOMBRE */
+.name{
+ background:rgba(142,230,192,1);
+ color:#173b35;
+ font-size:23px;
+ font-weight:800;
+ padding:11px 22px;
+ border-radius:12px;
+ max-width:100%;
+ overflow-wrap:anywhere;
+ box-shadow:0 5px 15px rgba(0,0,0,.25);
+ letter-spacing:.4px;
+ text-align:center;
+ flex-shrink:0;
+}
 
-  .message-card {
-    padding: 15px 19px;
-  }
+/* COMENTARIO */
+.message-card{
+ background:rgba(17,35,48,.96);
+ border:2px solid rgba(255,255,255,.85);
+ border-radius:16px;
+ padding:20px 26px;
+ width:fit-content;
+ max-width:100%;
+ box-shadow:0 8px 30px rgba(0,0,0,.35);
+}
+
+.body{
+ color:#ffffff;
+ font-size:34px;
+ line-height:1.3;
+ font-weight:600;
+ text-align:left;
+ overflow-wrap:anywhere;
+ white-space:pre-wrap;
+}
+
+/* ALINEACIÓN DEL NOMBRE */
+#overlay.position-left .name:not(.force-center){
+ align-self:flex-start;
+}
+
+#overlay.position-center .name:not(.force-center){
+ align-self:center;
+}
+
+#overlay.position-right .name:not(.force-center){
+ align-self:flex-end;
+}
+
+#overlay.name-center .name{
+ align-self:center;
+}
+
+/* ANIMACIONES */
+#overlay.animation-slide.visible{
+ animation:aparecer .35s ease-out;
+}
+
+#overlay.animation-fade.visible{
+ animation:desvanecer .5s ease-out;
+}
+
+#overlay.animation-none.visible{
+ animation:none;
+}
+
+@keyframes aparecer{
+ from{
+  opacity:0;
+  translate:0 20px;
+ }
+ to{
+  opacity:1;
+  translate:0 0;
+ }
+}
+
+@keyframes desvanecer{
+ from{opacity:0}
+ to{opacity:1}
+}
+
+/* PANTALLAS PEQUEÑAS */
+@media(max-width:700px){
+ .name{
+  padding:9px 16px;
+ }
+
+ .message-card{
+  padding:15px 19px;
+ }
 }
 </style>
 </head>
 
 <body>
 
-<div id="overlay" class="animation-slide">
-  <div class="name" id="displayName"></div>
-  <div class="message-card">
-    <div class="body" id="messageBody"></div>
-  </div>
+<div id="overlay" class="position-center name-top animation-slide">
+ <div class="name" id="displayName"></div>
+
+ <div class="message-card" id="messageCard">
+  <div class="body" id="messageBody"></div>
+ </div>
 </div>
 
 <script>
 (() => {
 
-  const SUPABASE_URL = "https://qvjbaiuydxcvgnxvaudl.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_sytKjRRv8mfMp3vlQbgNmQ_PsIlU5EO";
+ const SUPABASE_URL = "https://qvjbaiuydxcvgnxvaudl.supabase.co";
+ const SUPABASE_KEY = "sb_publishable_sytKjRRv8mfMp3vlQbgNmQ_PsIlU5EO";
 
-  const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+ const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+ );
 
-  const overlay = document.getElementById("overlay");
-  const displayName = document.getElementById("displayName");
-  const messageBody = document.getElementById("messageBody");
+ const overlay = document.getElementById("overlay");
+ const displayName = document.getElementById("displayName");
+ const messageBody = document.getElementById("messageBody");
+ const messageCard = document.getElementById("messageCard");
 
-  let currentSettings = {
-    name_bg_color: "#8ee6c0",
-    name_text_color: "#173b35",
-    message_bg_color: "#112330",
-    message_text_color: "#ffffff",
-    message_border_color: "#ffffff",
-    name_font_size: 23,
-    message_font_size: 34,
-    display_duration_seconds: 0,
-    animation: "slide"
+ let currentSettings = {
+  name_bg_color:"#8ee6c0",
+  name_text_color:"#173b35",
+  message_bg_color:"#112330",
+  message_text_color:"#ffffff",
+  message_border_color:"#ffffff",
+
+  name_font_size:23,
+  message_font_size:34,
+
+  name_bg_opacity:100,
+  message_bg_opacity:96,
+
+  message_position:"center",
+  name_position:"top",
+
+  display_duration_seconds:0,
+  animation:"slide"
+ };
+
+ let displayTimer = null;
+ let currentMessageVisible = false;
+
+ /* CONVERTIR COLOR HEX A RGBA */
+ function hexToRgba(hex,opacity){
+  const clean = String(hex || "#000000").replace("#","");
+
+  const full = clean.length === 3
+   ? clean.split("").map(c=>c+c).join("")
+   : clean;
+
+  const number = parseInt(full,16);
+
+  const r = (number >> 16) & 255;
+  const g = (number >> 8) & 255;
+  const b = number & 255;
+
+  const alpha = Math.max(
+   0,
+   Math.min(100,Number(opacity ?? 100))
+  ) / 100;
+
+  return `rgba(${r},${g},${b},${alpha})`;
+ }
+
+ function clearDisplayTimer(){
+  if(displayTimer){
+   clearTimeout(displayTimer);
+   displayTimer = null;
+  }
+ }
+
+ function hideMessage(){
+  clearDisplayTimer();
+  currentMessageVisible = false;
+  overlay.classList.remove("visible");
+ }
+
+ /* APLICAR TODA LA CONFIGURACIÓN */
+ function applySettings(settings){
+  if(!settings) return;
+
+  currentSettings = {
+   ...currentSettings,
+   ...settings
   };
 
-  let displayTimer = null;
-  let currentMessageVisible = false;
+  /* COLORES Y TRANSPARENCIAS */
 
-  function clearDisplayTimer() {
-    if (displayTimer) {
-      clearTimeout(displayTimer);
-      displayTimer = null;
+  displayName.style.backgroundColor = hexToRgba(
+   currentSettings.name_bg_color,
+   currentSettings.name_bg_opacity
+  );
+
+  displayName.style.color =
+   currentSettings.name_text_color;
+
+  displayName.style.fontSize =
+   currentSettings.name_font_size + "px";
+
+  messageCard.style.backgroundColor = hexToRgba(
+   currentSettings.message_bg_color,
+   currentSettings.message_bg_opacity
+  );
+
+  messageCard.style.borderColor =
+   currentSettings.message_border_color;
+
+  messageBody.style.color =
+   currentSettings.message_text_color;
+
+  messageBody.style.fontSize =
+   currentSettings.message_font_size + "px";
+
+  /* POSICIÓN DEL COMENTARIO */
+
+  const messagePosition = [
+   "left","center","right"
+  ].includes(currentSettings.message_position)
+   ? currentSettings.message_position
+   : "center";
+
+  overlay.classList.remove(
+   "position-left",
+   "position-center",
+   "position-right"
+  );
+
+  overlay.classList.add(
+   "position-" + messagePosition
+  );
+
+  /* POSICIÓN DEL NOMBRE */
+
+  const namePosition = [
+   "top","bottom","left","right","center"
+  ].includes(currentSettings.name_position)
+   ? currentSettings.name_position
+   : "top";
+
+  overlay.classList.remove(
+   "name-top",
+   "name-bottom",
+   "name-left",
+   "name-right",
+   "name-center"
+  );
+
+  overlay.classList.add(
+   "name-" + namePosition
+  );
+
+  /* ALINEACIÓN DEL TEXTO DEL COMENTARIO */
+
+  messageBody.style.textAlign = messagePosition;
+
+  /* ANIMACIÓN */
+
+  overlay.classList.remove(
+   "animation-slide",
+   "animation-fade",
+   "animation-none"
+  );
+
+  const animation = [
+   "slide","fade","none"
+  ].includes(currentSettings.animation)
+   ? currentSettings.animation
+   : "slide";
+
+  overlay.classList.add("animation-" + animation);
+
+  /* ACTUALIZAR TEMPORIZADOR SI ESTÁ VISIBLE */
+
+  if(currentMessageVisible){
+   startDisplayTimer();
+  }
+ }
+
+ /* DURACIÓN DEL MENSAJE */
+ function startDisplayTimer(){
+  clearDisplayTimer();
+
+  const seconds = Number(
+   currentSettings.display_duration_seconds
+  ) || 0;
+
+  // Cero significa permanencia hasta retirar manualmente.
+  if(seconds <= 0) return;
+
+  displayTimer = setTimeout(()=>{
+   hideMessage();
+  },seconds * 1000);
+ }
+
+ /* MOSTRAR MENSAJE */
+ function showMessage(data){
+  if(!data || !data.is_visible){
+   hideMessage();
+   return;
+  }
+
+  displayName.textContent =
+   data.display_name || "Participante";
+
+  messageBody.textContent =
+   data.body || "";
+
+  clearDisplayTimer();
+  currentMessageVisible = true;
+
+  overlay.classList.remove("visible");
+
+  // Reiniciar animación.
+  void overlay.offsetWidth;
+
+  requestAnimationFrame(()=>{
+   overlay.classList.add("visible");
+   startDisplayTimer();
+  });
+ }
+
+ /* CARGAR CONFIGURACIÓN */
+ async function loadSettings(){
+  const {data,error} = await db
+   .from("live_chat_overlay_settings")
+   .select("*")
+   .eq("slot",1)
+   .maybeSingle();
+
+  if(error){
+   console.error(
+    "Error al cargar diseño de OBS:",
+    error
+   );
+   return;
+  }
+
+  if(data){
+   applySettings(data);
+   console.log("Diseño de OBS cargado:",data);
+  }
+ }
+
+ /* CARGAR MENSAJE DESTACADO */
+ async function loadFeatured(){
+  const {data,error} = await db
+   .from("live_chat_featured")
+   .select("slot,display_name,body,is_visible")
+   .eq("slot",1)
+   .maybeSingle();
+
+  if(error){
+   console.error(
+    "Error al cargar mensaje destacado:",
+    error
+   );
+   return;
+  }
+
+  showMessage(data);
+ }
+
+ /* ACTUALIZACIONES EN TIEMPO REAL */
+ function startRealtime(){
+
+  db.channel("obs-featured-message")
+   .on(
+    "postgres_changes",
+    {
+     event:"*",
+     schema:"public",
+     table:"live_chat_featured",
+     filter:"slot=eq.1"
+    },
+    payload=>{
+     showMessage(payload.new);
     }
-  }
-
-  function hideMessage() {
-    clearDisplayTimer();
-    currentMessageVisible = false;
-    overlay.classList.remove("visible");
-  }
-
-  function applySettings(settings) {
-    if (!settings) return;
-
-    currentSettings = {
-      ...currentSettings,
-      ...settings
-    };
-
-    displayName.style.backgroundColor =
-      currentSettings.name_bg_color;
-
-    displayName.style.color =
-      currentSettings.name_text_color;
-
-    displayName.style.fontSize =
-      currentSettings.name_font_size + "px";
-
-    messageBody.style.color =
-      currentSettings.message_text_color;
-
-    messageBody.style.fontSize =
-      currentSettings.message_font_size + "px";
-
-    document.querySelector(".message-card").style.backgroundColor =
-      currentSettings.message_bg_color;
-
-    document.querySelector(".message-card").style.borderColor =
-      currentSettings.message_border_color;
-
-    overlay.classList.remove(
-      "animation-slide",
-      "animation-fade",
-      "animation-none"
+   )
+   .subscribe(status=>{
+    console.log(
+     "Estado de conexión OBS:",
+     status
     );
+   });
 
-    const animation = [
-      "slide",
-      "fade",
-      "none"
-    ].includes(currentSettings.animation)
-      ? currentSettings.animation
-      : "slide";
+  db.channel("obs-overlay-settings")
+   .on(
+    "postgres_changes",
+    {
+     event:"UPDATE",
+     schema:"public",
+     table:"live_chat_overlay_settings",
+     filter:"slot=eq.1"
+    },
+    payload=>{
+     if(payload.new){
+      applySettings(payload.new);
 
-    overlay.classList.add("animation-" + animation);
-
-    // Si el mensaje está visible, adapta su tiempo
-    // al nuevo ajuste de duración.
-    if (currentMessageVisible) {
-      startDisplayTimer();
-    }
-  }
-
-  function startDisplayTimer() {
-    clearDisplayTimer();
-
-    const seconds = Number(
-      currentSettings.display_duration_seconds
-    ) || 0;
-
-    // Cero significa que no desaparece automáticamente.
-    if (seconds <= 0) return;
-
-    displayTimer = setTimeout(() => {
-      hideMessage();
-    }, seconds * 1000);
-  }
-
-  function showMessage(data) {
-    if (!data || !data.is_visible) {
-      hideMessage();
-      return;
-    }
-
-    displayName.textContent =
-      data.display_name || "Participante";
-
-    messageBody.textContent =
-      data.body || "";
-
-    clearDisplayTimer();
-    currentMessageVisible = true;
-
-    overlay.classList.remove("visible");
-
-    // Reinicia la animación cada vez que llega un mensaje.
-    void overlay.offsetWidth;
-
-    requestAnimationFrame(() => {
-      overlay.classList.add("visible");
-      startDisplayTimer();
-    });
-  }
-
-  async function loadSettings() {
-    const { data, error } = await db
-      .from("live_chat_overlay_settings")
-      .select("*")
-      .eq("slot", 1)
-      .maybeSingle();
-
-    if (error) {
-      console.error(
-        "Error al cargar diseño de OBS:",
-        error
+      console.log(
+       "Diseño de OBS actualizado:",
+       payload.new
       );
-      return;
+     }
     }
+   )
+   .subscribe(status=>{
+    console.log(
+     "Estado de configuración OBS:",
+     status
+    );
+   });
+ }
 
-    if (data) {
-      applySettings(data);
-    }
-  }
+ /* INICIAR */
+ async function init(){
 
-  async function loadFeatured() {
-    const { data, error } = await db
-      .from("live_chat_featured")
-      .select("slot, display_name, body, is_visible")
-      .eq("slot", 1)
-      .maybeSingle();
+  await loadSettings();
 
-    if (error) {
-      console.error(
-        "Error al cargar mensaje destacado:",
-        error
-      );
-      return;
-    }
+  await loadFeatured();
 
-    showMessage(data);
-  }
+  startRealtime();
 
-  function startRealtime() {
+  console.log("Overlay TIEMPO DE CRE-SER iniciado.");
+ }
 
-    db.channel("obs-featured-message")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "live_chat_featured",
-          filter: "slot=eq.1"
-        },
-        (payload) => {
-          showMessage(payload.new);
-        }
-      )
-      .subscribe((status) => {
-        console.log(
-          "Estado de conexión OBS:",
-          status
-        );
-      });
-
-    db.channel("obs-overlay-settings")
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "live_chat_overlay_settings",
-          filter: "slot=eq.1"
-        },
-        (payload) => {
-          if (payload.new) {
-            applySettings(payload.new);
-            console.log(
-              "Diseño de OBS actualizado"
-            );
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log(
-          "Estado de configuración OBS:",
-          status
-        );
-      });
-  }
-
-  async function init() {
-    // Primero carga el diseño guardado.
-    await loadSettings();
-
-    // Después carga el mensaje destacado.
-    await loadFeatured();
-
-    // Finalmente activa las actualizaciones en vivo.
-    startRealtime();
-  }
-
-  init();
+ init();
 
 })();
 </script>
