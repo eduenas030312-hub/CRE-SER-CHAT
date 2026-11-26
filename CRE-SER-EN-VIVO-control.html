@@ -35,13 +35,23 @@ main{max-width:850px;margin:auto;padding:18px}
  margin-bottom:15px;
 }
 h2{font-size:17px;margin:0 0 12px}
-input{
+h3{font-size:14px;margin:18px 0 8px}
+input,select{
  width:100%;
  padding:12px;
  border:1px solid #ccd7d0;
  border-radius:8px;
  font-size:15px;
  margin:6px 0 12px;
+}
+input[type="color"]{
+ height:48px;
+ padding:5px;
+ cursor:pointer;
+}
+input[type="range"]{
+ padding:0;
+ accent-color:#08794c;
 }
 button{
  border:0;
@@ -85,11 +95,90 @@ button:disabled{opacity:.5;cursor:wait}
  padding:14px;
 }
 .featured strong{color:#08794c}
+
+.settings-grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:12px;
+}
+.setting-field{
+ background:#f7faf8;
+ border:1px solid #e2eae5;
+ border-radius:10px;
+ padding:12px;
+ min-width:0;
+}
+.setting-field label{
+ display:block;
+ font-size:12px;
+ font-weight:bold;
+ color:#40554a;
+ margin-bottom:5px;
+}
+.setting-field input,
+.setting-field select{
+ margin:5px 0 0;
+}
+.setting-field input[type="color"]{
+ width:100%;
+}
+.setting-field input[type="range"]{
+ width:100%;
+}
+.setting-value{
+ font-size:12px;
+ color:#08794c;
+ font-weight:bold;
+}
+.preview-area{
+ background:#263b49;
+ border-radius:10px;
+ padding:22px 14px;
+ margin:12px 0;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ gap:8px;
+ min-height:130px;
+ justify-content:center;
+}
+.preview-name{
+ align-self:center;
+ background:#8ee6c0;
+ color:#173b35;
+ font-size:15px;
+ font-weight:bold;
+ padding:8px 14px;
+ border-radius:9px;
+ max-width:100%;
+ overflow-wrap:anywhere;
+}
+.preview-message{
+ background:#112330;
+ color:#fff;
+ border:2px solid #fff;
+ border-radius:12px;
+ padding:12px 16px;
+ max-width:95%;
+ overflow-wrap:anywhere;
+ text-align:left;
+}
+.settings-note{
+ background:#fff8e8;
+ border:1px solid #f0dfb5;
+ border-radius:9px;
+ padding:12px;
+ color:#705b2e;
+ font-size:12px;
+ line-height:1.5;
+ margin-top:12px;
+}
 @media(max-width:480px){
  main{padding:10px}
  header{padding:14px}
  header h1{font-size:15px}
  .actions button{min-width:100%}
+ .settings-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -141,6 +230,100 @@ button:disabled{opacity:.5;cursor:wait}
    </button>
   </div>
 
+  <!-- PERSONALIZACIÓN DEL OVERLAY -->
+  <div class="panel">
+   <h2>DISEÑO DE MENSAJES EN OBS</h2>
+   <p class="info">
+    Personaliza cómo aparecerán los nombres y comentarios durante tu transmisión.
+    Los cambios se guardarán para futuras sesiones.
+   </p>
+
+   <h3>Colores</h3>
+   <div class="settings-grid">
+    <div class="setting-field">
+     <label for="nameBg">Fondo de la burbuja del nombre</label>
+     <input type="color" id="nameBg" value="#8ee6c0">
+    </div>
+
+    <div class="setting-field">
+     <label for="nameText">Texto del nombre</label>
+     <input type="color" id="nameText" value="#173b35">
+    </div>
+
+    <div class="setting-field">
+     <label for="messageBg">Fondo del comentario</label>
+     <input type="color" id="messageBg" value="#112330">
+    </div>
+
+    <div class="setting-field">
+     <label for="messageText">Texto del comentario</label>
+     <input type="color" id="messageText" value="#ffffff">
+    </div>
+
+    <div class="setting-field">
+     <label for="messageBorder">Borde de la burbuja</label>
+     <input type="color" id="messageBorder" value="#ffffff">
+    </div>
+   </div>
+
+   <h3>Tamaño de las letras</h3>
+   <div class="settings-grid">
+    <div class="setting-field">
+     <label for="nameSize">Tamaño del nombre</label>
+     <input type="range" id="nameSize" min="12" max="60" value="23">
+     <span class="setting-value" id="nameSizeValue">23 px</span>
+    </div>
+
+    <div class="setting-field">
+     <label for="messageSize">Tamaño del comentario</label>
+     <input type="range" id="messageSize" min="16" max="60" value="34">
+     <span class="setting-value" id="messageSizeValue">34 px</span>
+    </div>
+   </div>
+
+   <h3>Tiempo en pantalla</h3>
+   <div class="setting-field">
+    <label for="duration">¿Cuánto tiempo permanecerá el mensaje?</label>
+    <select id="duration">
+     <option value="0">Hasta que yo lo retire</option>
+     <option value="10">10 segundos</option>
+     <option value="15">15 segundos</option>
+     <option value="30">30 segundos</option>
+     <option value="60">1 minuto</option>
+     <option value="120">2 minutos</option>
+     <option value="300">5 minutos</option>
+    </select>
+    <p class="info">Cuando termine el tiempo, el mensaje desaparecerá automáticamente de OBS.</p>
+   </div>
+
+   <h3>Animación de entrada</h3>
+   <div class="setting-field">
+    <label for="animation">Selecciona el efecto</label>
+    <select id="animation">
+     <option value="slide">Entrada deslizante</option>
+     <option value="fade">Desvanecimiento</option>
+     <option value="none">Sin animación</option>
+    </select>
+   </div>
+
+   <h3>Vista previa del diseño</h3>
+   <div class="preview-area">
+    <div class="preview-name" id="previewName">MARÍA GONZÁLEZ</div>
+    <div class="preview-message" id="previewMessage">
+     ¡Gracias por acompañarnos!
+    </div>
+   </div>
+
+   <button id="saveSettingsButton" class="primary" style="width:100%">
+    GUARDAR DISEÑO
+   </button>
+
+   <p class="settings-note">
+    Los ajustes se guardan en Supabase. Después de conectar esta sección con el overlay,
+    OBS recibirá los cambios automáticamente.
+   </p>
+  </div>
+
   <div class="panel">
    <h2>Mensajes recibidos</h2>
    <p class="info">Los mensajes nuevos aparecerán aquí automáticamente. Solo se mostrarán en OBS cuando pulses DESTACAR.</p>
@@ -160,6 +343,8 @@ button:disabled{opacity:.5;cursor:wait}
  const SUPABASE_URL = "https://qvjbaiuydxcvgnxvaudl.supabase.co";
  const SUPABASE_ANON_KEY = "sb_publishable_sytKjRRv8mfMp3vlQbgNmQ_PsIlU5EO";
 
+ const ADMIN_ID = "ebd46ed1-2252-480e-8890-d0dfdace0311";
+
  const db = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
@@ -175,11 +360,16 @@ button:disabled{opacity:.5;cursor:wait}
  const removeButton = document.getElementById("removeButton");
  const connection = document.getElementById("connection");
  const notice = document.getElementById("notice");
+ const saveSettingsButton = document.getElementById("saveSettingsButton");
 
  let currentFeatured = null;
  let messageChannel = null;
  let featuredChannel = null;
+ let settingsChannel = null;
  let busy = false;
+ let settingsBusy = false;
+ let isAdmin = false;
+ let displayTimer = null;
 
  function escapeHTML(value){
   return String(value ?? "").replace(/[&<>"']/g, c => ({
@@ -215,6 +405,116 @@ button:disabled{opacity:.5;cursor:wait}
   loginPanel.classList.add("hidden");
   controlPanel.classList.remove("hidden");
   connection.textContent = "Conectando…";
+ }
+
+ function getSettingsFromForm(){
+  return {
+   name_bg_color:document.getElementById("nameBg").value,
+   name_text_color:document.getElementById("nameText").value,
+   message_bg_color:document.getElementById("messageBg").value,
+   message_text_color:document.getElementById("messageText").value,
+   message_border_color:document.getElementById("messageBorder").value,
+   name_font_size:Number(document.getElementById("nameSize").value),
+   message_font_size:Number(document.getElementById("messageSize").value),
+   display_duration_seconds:Number(document.getElementById("duration").value),
+   animation:document.getElementById("animation").value
+  };
+ }
+
+ function applySettingsToPreview(settings){
+  const previewName = document.getElementById("previewName");
+  const previewMessage = document.getElementById("previewMessage");
+
+  previewName.style.backgroundColor = settings.name_bg_color;
+  previewName.style.color = settings.name_text_color;
+  previewName.style.fontSize = settings.name_font_size+"px";
+
+  previewMessage.style.backgroundColor = settings.message_bg_color;
+  previewMessage.style.color = settings.message_text_color;
+  previewMessage.style.borderColor = settings.message_border_color;
+  previewMessage.style.fontSize = settings.message_font_size+"px";
+ }
+
+ function updatePreview(){
+  applySettingsToPreview(getSettingsFromForm());
+ }
+
+ function updateRangeLabels(){
+  document.getElementById("nameSizeValue").textContent =
+   document.getElementById("nameSize").value+" px";
+
+  document.getElementById("messageSizeValue").textContent =
+   document.getElementById("messageSize").value+" px";
+ }
+
+ async function loadSettings(){
+  const {data,error} = await db
+   .from("live_chat_overlay_settings")
+   .select("*")
+   .eq("slot",1)
+   .maybeSingle();
+
+  if(error){
+   showNotice("No se pudieron cargar los ajustes: "+error.message);
+   return;
+  }
+
+  if(!data){
+   showNotice("No se encontró la configuración del diseño.");
+   return;
+  }
+
+  document.getElementById("nameBg").value = data.name_bg_color;
+  document.getElementById("nameText").value = data.name_text_color;
+  document.getElementById("messageBg").value = data.message_bg_color;
+  document.getElementById("messageText").value = data.message_text_color;
+  document.getElementById("messageBorder").value = data.message_border_color;
+
+  document.getElementById("nameSize").value = data.name_font_size;
+  document.getElementById("messageSize").value = data.message_font_size;
+
+  document.getElementById("duration").value =
+   String(data.display_duration_seconds);
+
+  document.getElementById("animation").value = data.animation;
+
+  updateRangeLabels();
+  updatePreview();
+ }
+
+ async function saveSettings(){
+  if(settingsBusy) return;
+
+  if(!isAdmin){
+   showNotice("Tu cuenta no tiene permiso para modificar el diseño.");
+   return;
+  }
+
+  settingsBusy = true;
+  saveSettingsButton.disabled = true;
+  saveSettingsButton.textContent = "GUARDANDO…";
+  showNotice("");
+
+  const settings = getSettingsFromForm();
+
+  const {error} = await db
+   .from("live_chat_overlay_settings")
+   .update({
+    ...settings,
+    updated_at:new Date().toISOString()
+   })
+   .eq("slot",1);
+
+  settingsBusy = false;
+  saveSettingsButton.disabled = false;
+  saveSettingsButton.textContent = "GUARDAR DISEÑO";
+
+  if(error){
+   showNotice("No se pudo guardar el diseño: "+error.message);
+   return;
+  }
+
+  showNotice("Diseño guardado correctamente. El overlay recibirá los cambios al estar conectado.");
  }
 
  async function loadMessages(){
@@ -360,6 +660,7 @@ button:disabled{opacity:.5;cursor:wait}
  function startRealtime(){
   if(messageChannel) db.removeChannel(messageChannel);
   if(featuredChannel) db.removeChannel(featuredChannel);
+  if(settingsChannel) db.removeChannel(settingsChannel);
 
   messageChannel = db
    .channel("control-chat-messages")
@@ -385,13 +686,61 @@ button:disabled{opacity:.5;cursor:wait}
    })
    .subscribe();
 
+  settingsChannel = db
+   .channel("control-overlay-settings")
+   .on("postgres_changes",{
+    event:"UPDATE",
+    schema:"public",
+    table:"live_chat_overlay_settings",
+    filter:"slot=eq.1"
+   },event=>{
+    const data = event.new;
+    if(!data) return;
+
+    document.getElementById("nameBg").value = data.name_bg_color;
+    document.getElementById("nameText").value = data.name_text_color;
+    document.getElementById("messageBg").value = data.message_bg_color;
+    document.getElementById("messageText").value = data.message_text_color;
+    document.getElementById("messageBorder").value = data.message_border_color;
+    document.getElementById("nameSize").value = data.name_font_size;
+    document.getElementById("messageSize").value = data.message_font_size;
+    document.getElementById("duration").value = String(data.display_duration_seconds);
+    document.getElementById("animation").value = data.animation;
+
+    updateRangeLabels();
+    updatePreview();
+   })
+   .subscribe();
+
   connection.textContent = "Panel conectado";
  }
 
  async function openPanel(){
   showControl();
   showNotice("");
-  await Promise.all([loadMessages(),loadFeatured()]);
+
+  const {data:userData,error:userError} = await db.auth.getUser();
+
+  if(userError || !userData.user){
+   showNotice("No se pudo verificar la cuenta de administrador.");
+   return;
+  }
+
+  isAdmin = userData.user.id === ADMIN_ID;
+
+  if(!isAdmin){
+   showNotice("Tu cuenta puede consultar el panel, pero no tiene permiso para modificar el diseño ni destacar mensajes.");
+   saveSettingsButton.disabled = true;
+  }else{
+   saveSettingsButton.disabled = false;
+  }
+
+  await Promise.all([
+   loadMessages(),
+   loadFeatured(),
+   loadSettings()
+  ]);
+
   startRealtime();
  }
 
@@ -421,11 +770,36 @@ button:disabled{opacity:.5;cursor:wait}
  });
 
  removeButton.addEventListener("click",removeFeatured);
+ saveSettingsButton.addEventListener("click",saveSettings);
+
+ [
+  "nameBg",
+  "nameText",
+  "messageBg",
+  "messageText",
+  "messageBorder",
+  "nameSize",
+  "messageSize",
+  "duration",
+  "animation"
+ ].forEach(id=>{
+  document.getElementById(id).addEventListener("input",()=>{
+   updateRangeLabels();
+   updatePreview();
+  });
+  document.getElementById(id).addEventListener("change",()=>{
+   updateRangeLabels();
+   updatePreview();
+  });
+ });
 
  document.getElementById("logoutButton").addEventListener("click",async()=>{
   if(messageChannel) db.removeChannel(messageChannel);
   if(featuredChannel) db.removeChannel(featuredChannel);
+  if(settingsChannel) db.removeChannel(settingsChannel);
+
   await db.auth.signOut();
+  isAdmin = false;
   showLogin();
  });
 
@@ -439,6 +813,7 @@ button:disabled{opacity:.5;cursor:wait}
 
  db.auth.onAuthStateChange((event,session)=>{
   if(event === "SIGNED_OUT" || !session){
+   isAdmin = false;
    showLogin();
   }
  });
