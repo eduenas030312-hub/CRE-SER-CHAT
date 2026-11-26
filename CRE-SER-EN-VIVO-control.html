@@ -30,24 +30,24 @@ main{
  width:100%;
  max-width:none;
  margin:0;
- padding:12px 18px;
+ padding:10px 16px;
 }
 .panel{
  background:white;
  border-radius:12px;
- padding:15px 18px;
+ padding:12px 16px;
  box-shadow:0 2px 10px #0000000c;
- margin-bottom:12px;
+ margin-bottom:10px;
 }
-h2{font-size:17px;margin:0 0 10px}
-h3{font-size:13px;margin:0 0 8px}
+h2{font-size:16px;margin:0 0 9px}
+h3{font-size:13px;margin:0 0 7px}
 input,select{
  width:100%;
- padding:9px;
+ padding:8px;
  border:1px solid #ccd7d0;
  border-radius:7px;
  font-size:13px;
- margin:4px 0;
+ margin:3px 0;
 }
 button{
  border:0;
@@ -67,30 +67,49 @@ button:disabled{opacity:.5;cursor:wait}
 .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .actions button{flex:1;min-width:140px}
 #notice{font-size:13px;color:#a33;margin:8px 2px}
+
+/* MENSAJES RECIBIDOS */
 .message{
  background:#f7faf8;
  border:1px solid #e2eae5;
  border-radius:10px;
- padding:12px 15px;
- margin:8px 0;
+ padding:10px 13px;
+ margin:7px 0;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:14px;
 }
-.message-name{font-size:13px;font-weight:bold;color:#08794c}
+.message-content{
+ flex:1;
+ min-width:0;
+}
+.message-name{
+ font-size:13px;
+ font-weight:bold;
+ color:#08794c;
+}
 .message-body{
  font-size:14px;
- line-height:1.5;
+ line-height:1.45;
  white-space:pre-wrap;
  overflow-wrap:anywhere;
- margin:6px 0;
+ margin:5px 0;
 }
-.message-time{font-size:10px;color:#87938c;margin-bottom:8px}
+.message-time{font-size:10px;color:#87938c}
+.feature-button{
+ flex:0 0 auto;
+ min-width:145px;
+ white-space:nowrap;
+}
 .featured{
  background:#e7f5eb;
  border:1px solid #b8dfc5;
  border-radius:10px;
- padding:13px;
+ padding:12px;
 }
 .featured strong{color:#08794c}
-#removeButton{margin-top:10px}
+#removeButton{margin-top:9px}
 #messages{
  max-height:42vh;
  min-height:130px;
@@ -98,11 +117,11 @@ button:disabled{opacity:.5;cursor:wait}
  padding-right:5px;
 }
 
-/* DISTRIBUCIÓN PRINCIPAL */
+/* DISEÑO PRINCIPAL: 2/3 Y 1/3 */
 .settings-layout{
  display:grid;
- grid-template-columns:minmax(0,3fr) minmax(220px,1fr);
- gap:12px;
+ grid-template-columns:minmax(0,2fr) minmax(0,1fr);
+ gap:10px;
  align-items:stretch;
 }
 .settings-main{
@@ -110,46 +129,46 @@ button:disabled{opacity:.5;cursor:wait}
  background:#f7faf8;
  border:1px solid #e2eae5;
  border-radius:10px;
- padding:12px;
+ padding:8px;
 }
 .settings-preview{
  min-width:0;
  background:#f7faf8;
  border:1px solid #e2eae5;
  border-radius:10px;
- padding:12px;
+ padding:9px;
  display:flex;
  flex-direction:column;
 }
 .settings-controls{
  display:grid;
- grid-template-columns:1.55fr 1fr 1fr 1fr;
- gap:10px;
+ grid-template-columns:1.5fr .9fr .95fr 1.05fr 1fr;
+ gap:5px;
  align-items:stretch;
 }
 .control-group{
  min-width:0;
- padding:8px;
+ padding:6px 7px;
  border-right:1px solid #dfe8e2;
 }
 .control-group:last-child{border-right:0}
 .control-title{
- font-size:11px;
+ font-size:10px;
  font-weight:bold;
  color:#40554a;
- margin-bottom:8px;
+ margin-bottom:6px;
 }
 .color-options{
  display:flex;
  flex-wrap:wrap;
- gap:9px;
+ gap:7px;
  align-items:center;
 }
 .color-option{
  display:flex;
  flex-direction:column;
  align-items:center;
- gap:4px;
+ gap:3px;
  font-size:9px;
  color:#53665b;
  text-align:center;
@@ -157,8 +176,8 @@ button:disabled{opacity:.5;cursor:wait}
 .color-option input[type="color"]{
  appearance:none;
  -webkit-appearance:none;
- width:34px;
- height:34px;
+ width:30px;
+ height:30px;
  padding:0;
  margin:0;
  border:2px solid white;
@@ -167,9 +186,7 @@ button:disabled{opacity:.5;cursor:wait}
  cursor:pointer;
  box-shadow:0 0 0 1px #b9c9bf;
 }
-.color-option input[type="color"]::-webkit-color-swatch-wrapper{
- padding:0;
-}
+.color-option input[type="color"]::-webkit-color-swatch-wrapper{padding:0}
 .color-option input[type="color"]::-webkit-color-swatch{
  border:0;
  border-radius:50%;
@@ -178,24 +195,22 @@ button:disabled{opacity:.5;cursor:wait}
  border:0;
  border-radius:50%;
 }
-.compact-field{
- margin-bottom:9px;
-}
+.compact-field{margin-bottom:6px}
 .compact-field label{
  display:block;
  font-size:10px;
  color:#53665b;
- margin-bottom:3px;
+ margin-bottom:2px;
  font-weight:bold;
 }
 .compact-field input[type="range"]{
  padding:0;
- margin:3px 0;
+ margin:2px 0;
  accent-color:#08794c;
 }
 .compact-field select{
  font-size:11px;
- padding:7px 5px;
+ padding:6px 5px;
  margin:2px 0;
 }
 .setting-value{
@@ -206,35 +221,35 @@ button:disabled{opacity:.5;cursor:wait}
 .preview-area{
  background:#263b49;
  border-radius:9px;
- padding:12px 8px;
- margin:8px 0;
+ padding:9px;
+ margin:5px 0;
  display:flex;
  flex-direction:column;
  align-items:center;
+ justify-content:center;
  gap:7px;
  flex:1;
- justify-content:center;
- min-height:135px;
+ min-height:115px;
  overflow:hidden;
 }
 .preview-name{
- align-self:center;
  background:#8ee6c0;
  color:#173b35;
  font-size:13px;
  font-weight:bold;
- padding:7px 12px;
+ padding:7px 11px;
  border-radius:9px;
- max-width:100%;
+ max-width:42%;
  overflow-wrap:anywhere;
  text-align:center;
+ flex-shrink:0;
 }
 .preview-message{
  background:#112330;
  color:#fff;
  border:2px solid #fff;
  border-radius:10px;
- padding:10px 12px;
+ padding:9px 11px;
  max-width:96%;
  overflow-wrap:anywhere;
  text-align:left;
@@ -251,35 +266,37 @@ button:disabled{opacity:.5;cursor:wait}
  display:flex;
  justify-content:space-between;
  align-items:center;
- gap:12px;
- margin-top:10px;
+ gap:10px;
+ margin-top:7px;
 }
 .settings-note{
  color:#69776f;
  font-size:10px;
- line-height:1.4;
+ line-height:1.35;
 }
 .save-button{
  white-space:nowrap;
- padding:10px 18px;
+ padding:9px 16px;
 }
 .featured-content{
  overflow-wrap:anywhere;
  white-space:pre-wrap;
 }
-@media(max-width:1050px){
+
+/* TABLET Y PANTALLAS MEDIANAS */
+@media(max-width:1150px){
  .settings-controls{
-  grid-template-columns:1.4fr 1fr 1fr 1fr;
-  gap:4px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
  }
- .control-group{padding:6px}
- .color-options{gap:6px}
- .color-option input[type="color"]{
-  width:29px;height:29px;
+ .control-group{
+  border-right:0;
+  border-bottom:1px solid #dfe8e2;
  }
 }
+
+/* MÓVILES */
 @media(max-width:760px){
- main{padding:10px}
+ main{padding:9px}
  header{padding:13px}
  .settings-layout{grid-template-columns:1fr}
  .settings-controls{
@@ -288,15 +305,23 @@ button:disabled{opacity:.5;cursor:wait}
  .control-group{
   border-right:0;
   border-bottom:1px solid #dfe8e2;
-  padding:9px;
+  padding:8px;
  }
- .settings-preview{min-height:190px}
- #messages{max-height:55vh}
+ .settings-preview{min-height:170px}
  .settings-footer{
   align-items:stretch;
   flex-direction:column;
  }
  .save-button{width:100%}
+ #messages{max-height:55vh}
+ .message{
+  align-items:stretch;
+  flex-direction:column;
+ }
+ .feature-button{
+  align-self:flex-end;
+  min-width:145px;
+ }
 }
 @media(max-width:430px){
  .settings-controls{grid-template-columns:1fr 1fr}
@@ -344,7 +369,7 @@ button:disabled{opacity:.5;cursor:wait}
    </div>
   </div>
 
-  <!-- DISEÑO HORIZONTAL Y VISTA PREVIA -->
+  <!-- DISEÑO DE MENSAJES -->
   <div class="panel">
    <h2>DISEÑO DE MENSAJES</h2>
 
@@ -353,7 +378,7 @@ button:disabled{opacity:.5;cursor:wait}
     <div class="settings-main">
      <div class="settings-controls">
 
-      <!-- CINCO COLORES -->
+      <!-- COLORES -->
       <div class="control-group">
        <div class="control-title">COLORES</div>
        <div class="color-options">
@@ -380,16 +405,14 @@ button:disabled{opacity:.5;cursor:wait}
        </div>
       </div>
 
-      <!-- TAMAÑOS Y TRANSPARENCIAS -->
+      <!-- TAMAÑO -->
       <div class="control-group">
        <div class="control-title">TAMAÑO DE LETRA</div>
-
        <div class="compact-field">
         <label for="nameSize">Nombre</label>
         <input type="range" id="nameSize" min="12" max="60" value="23">
         <span class="setting-value" id="nameSizeValue">23 px</span>
        </div>
-
        <div class="compact-field">
         <label for="messageSize">Comentario</label>
         <input type="range" id="messageSize" min="16" max="60" value="34">
@@ -400,17 +423,38 @@ button:disabled{opacity:.5;cursor:wait}
       <!-- TRANSPARENCIA -->
       <div class="control-group">
        <div class="control-title">TRANSPARENCIA</div>
-
        <div class="compact-field">
         <label for="nameOpacity">Fondo nombre</label>
         <input type="range" id="nameOpacity" min="0" max="100" value="100">
         <span class="setting-value" id="nameOpacityValue">100%</span>
        </div>
-
        <div class="compact-field">
         <label for="messageOpacity">Fondo comentario</label>
         <input type="range" id="messageOpacity" min="0" max="100" value="96">
         <span class="setting-value" id="messageOpacityValue">96%</span>
+       </div>
+      </div>
+
+      <!-- POSICIONES -->
+      <div class="control-group">
+       <div class="control-title">POSICIÓN DEL COMENTARIO</div>
+       <div class="compact-field">
+        <select id="messagePosition">
+         <option value="left">Izquierda</option>
+         <option value="center" selected>Centrado</option>
+         <option value="right">Derecha</option>
+        </select>
+       </div>
+
+       <div class="control-title" style="margin-top:8px">POSICIÓN DEL NOMBRE</div>
+       <div class="compact-field">
+        <select id="namePosition">
+         <option value="top" selected>Arriba</option>
+         <option value="bottom">Abajo</option>
+         <option value="left">Izquierda</option>
+         <option value="right">Derecha</option>
+         <option value="center">Centrado</option>
+        </select>
        </div>
       </div>
 
@@ -428,8 +472,7 @@ button:disabled{opacity:.5;cursor:wait}
          <option value="300">5 minutos</option>
         </select>
        </div>
-
-       <div class="control-title" style="margin-top:10px">ANIMACIÓN DE ENTRADA</div>
+       <div class="control-title" style="margin-top:8px">ANIMACIÓN DE ENTRADA</div>
        <div class="compact-field">
         <select id="animation">
          <option value="slide">Deslizar</option>
@@ -455,7 +498,7 @@ button:disabled{opacity:.5;cursor:wait}
     <!-- VISTA PREVIA -->
     <div class="settings-preview">
      <h3>VISTA PREVIA</h3>
-     <div class="preview-area">
+     <div class="preview-area" id="previewArea">
       <div class="preview-name" id="previewName">MARÍA GONZÁLEZ</div>
       <div class="preview-message" id="previewMessage">
        ¡Gracias por acompañarnos!
@@ -577,6 +620,8 @@ button:disabled{opacity:.5;cursor:wait}
    message_font_size:Number($("messageSize").value),
    name_bg_opacity:Number($("nameOpacity").value),
    message_bg_opacity:Number($("messageOpacity").value),
+   message_position:$("messagePosition").value,
+   name_position:$("namePosition").value,
    display_duration_seconds:Number($("duration").value),
    animation:$("animation").value
   };
@@ -590,18 +635,54 @@ button:disabled{opacity:.5;cursor:wait}
  }
 
  function applySettingsToPreview(settings){
-  $("previewName").style.backgroundColor =
+  const previewArea = $("previewArea");
+  const previewName = $("previewName");
+  const previewMessage = $("previewMessage");
+
+  previewName.style.backgroundColor =
    hexToRgba(settings.name_bg_color,settings.name_bg_opacity);
 
-  $("previewName").style.color = settings.name_text_color;
-  $("previewName").style.fontSize = settings.name_font_size+"px";
+  previewName.style.color = settings.name_text_color;
+  previewName.style.fontSize = settings.name_font_size+"px";
 
-  $("previewMessage").style.backgroundColor =
+  previewMessage.style.backgroundColor =
    hexToRgba(settings.message_bg_color,settings.message_bg_opacity);
 
-  $("previewMessage").style.color = settings.message_text_color;
-  $("previewMessage").style.borderColor = settings.message_border_color;
-  $("previewMessage").style.fontSize = settings.message_font_size+"px";
+  previewMessage.style.color = settings.message_text_color;
+  previewMessage.style.borderColor = settings.message_border_color;
+  previewMessage.style.fontSize = settings.message_font_size+"px";
+
+  const messagePosition = settings.message_position || "center";
+  const namePosition = settings.name_position || "top";
+
+  previewArea.style.flexDirection =
+   namePosition === "bottom" ? "column-reverse" :
+   namePosition === "left" ? "row" :
+   namePosition === "right" ? "row-reverse" :
+   "column";
+
+  const alignment =
+   messagePosition === "left" ? "flex-start" :
+   messagePosition === "right" ? "flex-end" :
+   "center";
+
+  if(namePosition === "left" || namePosition === "right"){
+   previewArea.style.alignItems = "center";
+   previewArea.style.justifyContent = alignment;
+   previewName.style.maxWidth = "35%";
+   previewMessage.style.maxWidth = "65%";
+  }else{
+   previewArea.style.alignItems = alignment;
+   previewArea.style.justifyContent = "center";
+   previewName.style.maxWidth = "85%";
+   previewMessage.style.maxWidth = "96%";
+  }
+
+  if(namePosition === "center"){
+   previewName.style.alignSelf = "center";
+  }else{
+   previewName.style.alignSelf = "";
+  }
  }
 
  function updatePreview(){
@@ -622,6 +703,9 @@ button:disabled{opacity:.5;cursor:wait}
 
   $("nameOpacity").value = data.name_bg_opacity ?? 100;
   $("messageOpacity").value = data.message_bg_opacity ?? 96;
+
+  $("messagePosition").value = data.message_position || "center";
+  $("namePosition").value = data.name_position || "top";
 
   $("duration").value = String(data.display_duration_seconds ?? 0);
   $("animation").value = data.animation || "slide";
@@ -712,21 +796,22 @@ button:disabled{opacity:.5;cursor:wait}
 
   messagesBox.innerHTML = rows.map(row => `
    <article class="message">
-    <div class="message-name">${escapeHTML(row.display_name)}</div>
-    <div class="message-body">${escapeHTML(row.body)}</div>
-    <div class="message-time">${escapeHTML(formatTime(row.created_at))}</div>
-    <div class="actions">
-     <button class="primary feature-button"
-      data-id="${escapeHTML(row.id)}"
-      data-name="${escapeHTML(row.display_name)}"
-      data-body="${escapeHTML(row.body)}">
-      DESTACAR EN OBS
-     </button>
+    <div class="message-content">
+     <div class="message-name">${escapeHTML(row.display_name)}</div>
+     <div class="message-body">${escapeHTML(row.body)}</div>
+     <div class="message-time">${escapeHTML(formatTime(row.created_at))}</div>
     </div>
+    <button class="primary feature-button"
+     data-id="${escapeHTML(row.id)}"
+     data-name="${escapeHTML(row.display_name)}"
+     data-body="${escapeHTML(row.body)}">
+     DESTACAR EN OBS
+    </button>
    </article>
   `).join("");
 
   messagesBox.querySelectorAll(".feature-button").forEach(button=>{
+   button.disabled = !isAdmin;
    button.addEventListener("click",()=>{
     featureMessage(
      button.dataset.id,
@@ -942,6 +1027,8 @@ button:disabled{opacity:.5;cursor:wait}
   "messageSize",
   "nameOpacity",
   "messageOpacity",
+  "messagePosition",
+  "namePosition",
   "duration",
   "animation"
  ].forEach(id=>{
