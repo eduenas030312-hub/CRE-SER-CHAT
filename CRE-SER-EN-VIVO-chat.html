@@ -6,202 +6,209 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Chat TIEMPO DE CRE-SER</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root{font-family:Arial,sans-serif;color:#17231f;background:#fff}
 *{box-sizing:border-box}
 body{margin:0}
-.chat{height:100dvh;min-height:360px;display:flex;flex-direction:column;background:#fff;border:1px solid #e5e7eb}
-.head{padding:13px 15px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.chat{height:100dvh;min-height:360px;display:flex;flex-direction:column;background:#fff}
+.head{padding:12px 15px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between}
 .brand{font-weight:700;font-size:15px}
-.status{font-size:11px;color:#17834e;white-space:nowrap}
+.status{font-size:11px;color:#17834e}
 #messages{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
-.msg{max-width:94%;background:#f1f5f3;border-radius:12px;padding:9px 11px;overflow-wrap:anywhere}
+.msg{max-width:85%;background:#f1f5f3;border-radius:12px;padding:9px 11px;overflow-wrap:anywhere;align-self:flex-start}
+.msg.mine{align-self:flex-end;background:#dff3e7}
 .msg .name{font-size:11px;font-weight:700;color:#176344;margin-bottom:4px}
+.msg.mine .name{text-align:right;color:#087a4b}
 .msg .body{font-size:14px;line-height:1.4;white-space:pre-wrap}
 .msg .time{font-size:10px;color:#718078;margin-top:5px;text-align:right}
 .empty{margin:auto;text-align:center;color:#78857e;font-size:13px;padding:20px}
-
-form{
-  border-top:1px solid #e5e7eb;
-  padding:10px;
-  display:flex;
-  gap:7px;
-  align-items:stretch;
-}
-
-input,textarea{
-  min-width:0;
-  border:1px solid #d6ddd9;
-  border-radius:9px;
-  padding:11px;
-  font-size:14px;
-  outline:none;
-  font-family:Arial,sans-serif;
-}
-
-#name{
-  width:31%;
-  max-width:115px;
-  align-self:flex-start;
-}
-
-#message{
-  flex:1;
-  min-height:85px;
-  height:85px;
-  resize:vertical;
-  padding:12px;
-  font-size:15px;
-  line-height:1.5;
-}
-
-button{
-  border:0;
-  border-radius:9px;
-  background:#087a4b;
-  color:#fff;
-  font-weight:700;
-  padding:0 14px;
-  cursor:pointer;
-  align-self:flex-end;
-  min-height:42px;
-}
-
+form{border-top:1px solid #e5e7eb;padding:10px;display:flex;gap:7px;align-items:stretch}
+textarea{flex:1;min-width:0;min-height:75px;height:75px;resize:vertical;border:1px solid #d6ddd9;border-radius:9px;padding:11px;font-size:14px;outline:none;font-family:Arial,sans-serif;line-height:1.4}
+button{border:0;border-radius:9px;background:#087a4b;color:#fff;font-weight:700;padding:0 14px;cursor:pointer;align-self:flex-end;min-height:42px}
 button:disabled{opacity:.55;cursor:wait}
 .note{font-size:10px;color:#89938e;padding:0 12px 8px}
-
+#nameDialog{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+.dialog{background:white;border-radius:14px;padding:22px;width:100%;max-width:340px;box-shadow:0 8px 30px #0002}
+.dialog h2{font-size:19px;margin:0 0 8px}
+.dialog p{font-size:13px;color:#64716a;line-height:1.5}
+.dialog input{width:100%;padding:12px;border:1px solid #ccd5cf;border-radius:8px;font-size:15px}
+.dialog button{width:100%;margin-top:12px;padding:12px}
+#counter{font-size:10px;color:#89938e;align-self:flex-end;padding-bottom:5px}
 @media(max-width:420px){
-  #name{width:29%;font-size:12px;padding:9px}
-  #message{font-size:13px;padding:9px;min-height:75px;height:75px}
-  button{padding:0 11px}
+ .brand{font-size:13px}
+ textarea{font-size:13px}
 }
 </style>
 </head>
+
 <body>
+
 <section class="chat">
-  <header class="head">
-    <div class="brand">TIEMPO DE CRE-SER · Chat en vivo</div>
-    <div class="status" id="status">Conectando…</div>
-  </header>
+<header class="head">
+<div class="brand">TIEMPO DE CRE-SER · Chat en vivo</div>
+<div class="status" id="status">Conectando…</div>
+</header>
 
-  <main id="messages" aria-live="polite">
-    <div class="empty">Cargando conversación…</div>
-  </main>
+<main id="messages" aria-live="polite">
+<div class="empty">Bienvenidos. Iniciemos nuestra conversación.</div>
+</main>
 
-  <form id="form">
-    <input id="name" maxlength="32" minlength="2" placeholder="Tu nombre" aria-label="Tu nombre" required>
+<form id="form">
+<textarea id="message" rows="3" maxlength="100" placeholder="Escribe tu mensaje…" aria-label="Escribe tu mensaje" required></textarea>
+<div id="counter">0/100</div>
+<button id="send" type="submit" aria-label="Enviar">➤</button>
+</form>
 
-    <textarea id="message" rows="3" maxlength="500" placeholder="Escribe tu mensaje…" aria-label="Escribe tu mensaje" required></textarea>
-
-    <button id="send" type="submit" aria-label="Enviar">➤</button>
-  </form>
-
-  <div class="note">Conversemos con respeto. Máximo 500 caracteres por mensaje.</div>
+<div class="note">Conversemos con respeto. Máximo 100 caracteres por mensaje.</div>
 </section>
+
+<div id="nameDialog">
+<div class="dialog">
+<h2>¡Bienvenido!</h2>
+<p>Antes de participar, escribe el nombre con el que aparecerás en el chat.</p>
+<input id="nameInput" maxlength="32" minlength="2" placeholder="Tu nombre" autocomplete="name">
+<button id="saveName" type="button">Entrar al chat</button>
+</div>
+</div>
 
 <script>
 (() => {
-  const SUPABASE_URL = "https://qvjbaiuydxcvgnxvaudl.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_sytKjRRv8mfMp3vlQbgNmQ_PsIlU5EO";
+const SUPABASE_URL = "https://qvjbaiuydxcvgnxvaudl.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_sytKjRRv8mfMp3vlQbgNmQ_PsIlU5EO";
 
-  const statusEl = document.getElementById("status");
-  const list = document.getElementById("messages");
-  const form = document.getElementById("form");
-  const nameInput = document.getElementById("name");
-  const messageInput = document.getElementById("message");
-  const sendButton = document.getElementById("send");
-  const seen = new Set();
-  let client;
+const statusEl = document.getElementById("status");
+const list = document.getElementById("messages");
+const form = document.getElementById("form");
+const messageInput = document.getElementById("message");
+const sendButton = document.getElementById("send");
+const dialog = document.getElementById("nameDialog");
+const nameInput = document.getElementById("nameInput");
+const saveName = document.getElementById("saveName");
+const counter = document.getElementById("counter");
 
-  nameInput.value = localStorage.getItem("creser-chat-name") || "";
+const STORAGE_NAME = "creser-chat-name";
+const STORAGE_ID = "creser-chat-sender-id";
 
-  function safeText(value) {
-    return String(value ?? "").replace(/[&<>"']/g, c =>
-      ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
-  }
+let displayName = localStorage.getItem(STORAGE_NAME) || "";
+let senderId = localStorage.getItem(STORAGE_ID) || "";
+let client;
+const seen = new Set();
 
-  function addMessage(row) {
-    if (!row || seen.has(row.id)) return;
-    seen.add(row.id);
+function safeText(value) {
+ return String(value ?? "").replace(/[&<>"']/g,c =>
+ ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+}
 
-    const empty = list.querySelector(".empty");
-    if (empty) empty.remove();
+function updateCounter(){
+ counter.textContent = messageInput.value.length + "/100";
+}
+messageInput.addEventListener("input",updateCounter);
 
-    const item = document.createElement("article");
-    item.className = "msg";
-    const date = new Date(row.created_at);
+function addMessage(row){
+ if(!row || seen.has(row.id)) return;
+ seen.add(row.id);
 
-    item.innerHTML =
-      '<div class="name">' + safeText(row.display_name) + '</div>' +
-      '<div class="body">' + safeText(row.body) + '</div>' +
-      '<div class="time">' + date.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}) + '</div>';
+ const empty = list.querySelector(".empty");
+ if(empty) empty.remove();
 
-    list.appendChild(item);
-    while (list.children.length > 100) list.removeChild(list.firstChild);
-    list.scrollTop = list.scrollHeight;
-  }
+ const item = document.createElement("article");
+ const mine = row.sender_id && row.sender_id === senderId;
+ item.className = "msg" + (mine ? " mine" : "");
 
-  async function start() {
-    if (!window.supabase || SUPABASE_URL.startsWith("PEGA_") || SUPABASE_ANON_KEY.startsWith("PEGA_")) {
-      statusEl.textContent = "Falta configurar Supabase";
-      list.innerHTML = '<div class="empty">Hay que colocar la URL y la clave pública de Supabase en este archivo.</div>';
-      return;
-    }
+ const date = new Date(row.created_at);
+ item.innerHTML =
+ '<div class="name">' + safeText(row.display_name) + '</div>' +
+ '<div class="body">' + safeText(row.body) + '</div>' +
+ '<div class="time">' + date.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}) + '</div>';
 
-    client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+ list.appendChild(item);
+ list.scrollTop = list.scrollHeight;
+}
 
-    const {data,error} = await client.from("live_chat_messages")
-      .select("id,display_name,body,created_at")
-      .order("created_at",{ascending:true})
-      .limit(100);
+function showEmpty(){
+ list.innerHTML = '<div class="empty">¡Bienvenidos! Iniciemos nuestra conversación.</div>';
+}
 
-    if (error) throw error;
+async function start(){
+ if(!window.supabase){
+  statusEl.textContent = "Error de conexión";
+  return;
+ }
 
-    list.innerHTML = "";
-    (data || []).forEach(addMessage);
-    statusEl.textContent = "En vivo";
+ client = window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-    client.channel("creser-live-chat")
-      .on("postgres_changes",{event:"INSERT",schema:"public",table:"live_chat_messages"},payload => addMessage(payload.new))
-      .subscribe(state => {
-        statusEl.textContent = state === "SUBSCRIBED" ? "En vivo" : "Reconectando…";
-      });
-  }
+ // No se carga el historial anterior: la prueba comienza visualmente limpia.
+ showEmpty();
 
-  form.addEventListener("submit", async event => {
-    event.preventDefault();
+ const channel = client.channel("creser-live-chat")
+ .on("postgres_changes",
+ {event:"INSERT",schema:"public",table:"live_chat_messages"},
+ payload => addMessage(payload.new))
+ .subscribe(state=>{
+  statusEl.textContent = state === "SUBSCRIBED" ? "En vivo" : "Reconectando…";
+ });
+}
 
-    const display_name = nameInput.value.trim().replace(/\s+/g," ");
-    const body = messageInput.value.trim();
+saveName.addEventListener("click",()=>{
+ const value = nameInput.value.trim().replace(/\s+/g," ");
+ if(value.length < 2 || value.length > 32){
+  alert("Escribe un nombre de entre 2 y 32 caracteres.");
+  return;
+ }
 
-    if (display_name.length < 2 || display_name.length > 32 || !body || body.length > 500) return;
-    if (!client) return;
+ displayName = value;
+ senderId = crypto.randomUUID();
 
-    sendButton.disabled = true;
+ localStorage.setItem(STORAGE_NAME,displayName);
+ localStorage.setItem(STORAGE_ID,senderId);
 
-    try {
-      const {error} = await client.from("live_chat_messages").insert({display_name,body});
-      if (error) throw error;
+ dialog.style.display = "none";
+ start().catch(error=>{
+  console.error(error);
+  statusEl.textContent = "Error de conexión";
+ });
+});
 
-      localStorage.setItem("creser-chat-name",display_name);
-      messageInput.value = "";
-      messageInput.focus();
+if(displayName && senderId){
+ dialog.style.display = "none";
+ start().catch(error=>{
+  console.error(error);
+  statusEl.textContent = "Error de conexión";
+ });
+}else{
+ nameInput.value = displayName;
+ nameInput.focus();
+}
 
-    } catch (error) {
-      alert("No se pudo enviar el mensaje: " + (error.message || "intenta de nuevo"));
-    } finally {
-      sendButton.disabled = false;
-    }
+form.addEventListener("submit",async event=>{
+ event.preventDefault();
+
+ const body = messageInput.value.trim();
+ if(!body || body.length > 100 || !client || !senderId) return;
+
+ sendButton.disabled = true;
+
+ try{
+  const {error} = await client.from("live_chat_messages").insert({
+   display_name:displayName,
+   sender_id:senderId,
+   body:body
   });
 
-  start().catch(error => {
-    console.error(error);
-    statusEl.textContent = "Error de conexión";
-    list.innerHTML = '<div class="empty">No se pudo conectar. Revisa la configuración y las tablas de Supabase.</div>';
-  });
+  if(error) throw error;
+  messageInput.value = "";
+  updateCounter();
+  messageInput.focus();
+
+ }catch(error){
+  alert("No se pudo enviar el mensaje: " + (error.message || "intenta de nuevo"));
+ }finally{
+  sendButton.disabled = false;
+ }
+});
+
 })();
 </script>
 </body>
-</html>
-
 </html>
