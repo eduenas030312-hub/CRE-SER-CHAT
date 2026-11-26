@@ -34,7 +34,7 @@ button:disabled{opacity:.55;cursor:wait}
 .dialog p{font-size:13px;color:#64716a;line-height:1.5}
 .dialog input{width:100%;padding:12px;border:1px solid #ccd5cf;border-radius:8px;font-size:15px}
 .dialog button{width:100%;margin-top:12px;padding:12px}
-#counter{font-size:10px;color:#89938e;align-self:flex-end;padding-bottom:5px}
+#counter{font-size:10px;color:#89938e;align-self:flex-end;padding-bottom:5px;white-space:nowrap}
 @media(max-width:420px){
  .brand{font-size:13px}
  textarea{font-size:13px}
@@ -55,19 +55,22 @@ button:disabled{opacity:.55;cursor:wait}
 </main>
 
 <form id="form">
-<textarea id="message" rows="3" maxlength="200" placeholder="Escribe tu mensaje…" aria-label="Escribe tu mensaje" required></textarea>
-<div id="counter">0/200</div>
+<textarea id="message" rows="3" maxlength="300"
+placeholder="Escribe tu mensaje…"
+aria-label="Escribe tu mensaje" required></textarea>
+<div id="counter">0/300</div>
 <button id="send" type="submit" aria-label="Enviar">➤</button>
 </form>
 
-<div class="note">Enter para enviar · Shift + Enter para nueva línea · Máximo 200 caracteres.</div>
+<div class="note">Enter para enviar · Shift + Enter para nueva línea · Máximo 300 caracteres.</div>
 </section>
 
 <div id="nameDialog">
 <div class="dialog">
 <h2>¡Bienvenido!</h2>
 <p>Antes de participar, escribe el nombre con el que aparecerás en el chat.</p>
-<input id="nameInput" maxlength="32" minlength="2" placeholder="Tu nombre" autocomplete="name">
+<input id="nameInput" maxlength="32" minlength="2"
+placeholder="Tu nombre" autocomplete="name">
 <button id="saveName" type="button">Entrar al chat</button>
 </div>
 </div>
@@ -113,7 +116,6 @@ function safeText(value) {
  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
 }
 
-// Asigna un color estable a cada participante.
 function participantColor(row) {
  const key = String(row.sender_id || row.display_name || "participante");
  let hash = 0;
@@ -126,12 +128,11 @@ function participantColor(row) {
 }
 
 function updateCounter(){
- counter.textContent = messageInput.value.length + "/100";
+ counter.textContent = messageInput.value.length + "/300";
 }
 
 messageInput.addEventListener("input",updateCounter);
 
-// Enter envía; Shift + Enter inserta un salto de línea.
 messageInput.addEventListener("keydown",event=>{
  if(event.key === "Enter" && !event.shiftKey && !event.isComposing){
   event.preventDefault();
@@ -179,7 +180,7 @@ async function start(){
 
  client = window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
- // La prueba comienza sin cargar el historial anterior.
+ // No se carga el historial anterior.
  showEmpty();
 
  client.channel("creser-live-chat")
@@ -231,7 +232,7 @@ form.addEventListener("submit",async event=>{
 
  const body = messageInput.value.trim();
 
- if(!body || body.length > 100 || !client || !senderId) return;
+ if(!body || body.length > 300 || !client || !senderId) return;
 
  sendButton.disabled = true;
 
