@@ -1,0 +1,449 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Control de mensajes | TIEMPO DE CRE-SER</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#f1f5f2;
+ color:#203129;
+}
+header{
+ background:#075d3d;
+ color:white;
+ padding:18px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:12px;
+}
+header h1{font-size:18px;margin:0}
+header small{font-size:11px;opacity:.8}
+main{max-width:850px;margin:auto;padding:18px}
+.panel{
+ background:white;
+ border-radius:12px;
+ padding:18px;
+ box-shadow:0 2px 10px #0000000c;
+ margin-bottom:15px;
+}
+h2{font-size:17px;margin:0 0 12px}
+input{
+ width:100%;
+ padding:12px;
+ border:1px solid #ccd7d0;
+ border-radius:8px;
+ font-size:15px;
+ margin:6px 0 12px;
+}
+button{
+ border:0;
+ border-radius:8px;
+ padding:11px 14px;
+ font-weight:bold;
+ cursor:pointer;
+}
+button:disabled{opacity:.5;cursor:wait}
+.primary{background:#08794c;color:white}
+.secondary{background:#e8efea;color:#234334}
+.danger{background:#fbe9e9;color:#a42e2e}
+.login-button{width:100%}
+.hidden{display:none!important}
+.status{font-size:12px;color:#d7f6e3}
+.info{font-size:12px;color:#69776f;line-height:1.5}
+.message{
+ background:#f7faf8;
+ border:1px solid #e2eae5;
+ border-radius:10px;
+ padding:13px;
+ margin:10px 0;
+}
+.message-name{font-size:13px;font-weight:bold;color:#08794c}
+.message-body{
+ font-size:14px;
+ line-height:1.5;
+ white-space:pre-wrap;
+ overflow-wrap:anywhere;
+ margin:7px 0;
+}
+.message-time{font-size:10px;color:#87938c;margin-bottom:10px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{flex:1;min-width:140px}
+#messages{max-height:65vh;overflow:auto}
+#notice{font-size:13px;color:#a33;margin-top:10px}
+.featured{
+ background:#e7f5eb;
+ border:1px solid #b8dfc5;
+ border-radius:10px;
+ padding:14px;
+}
+.featured strong{color:#08794c}
+@media(max-width:480px){
+ main{padding:10px}
+ header{padding:14px}
+ header h1{font-size:15px}
+ .actions button{min-width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div>
+  <h1>TIEMPO DE CRE-SER</h1>
+  <small>Panel privado de mensajes destacados</small>
+ </div>
+ <div id="connection" class="status">Sin conexión</div>
+</header>
+
+<main>
+
+ <section id="loginPanel" class="panel">
+  <h2>Acceso de administrador</h2>
+  <p class="info">Ingresa con el correo y la contraseña que registraste en Supabase.</p>
+  <form id="loginForm">
+   <label for="email">Correo electrónico</label>
+   <input id="email" type="email" autocomplete="username" required>
+   <label for="password">Contraseña</label>
+   <input id="password" type="password" autocomplete="current-password" required>
+   <button class="primary login-button" type="submit" id="loginButton">ENTRAR AL PANEL</button>
+  </form>
+  <div id="loginError" role="alert"></div>
+ </section>
+
+ <section id="controlPanel" class="hidden">
+
+  <div class="panel">
+   <div class="actions">
+    <div style="flex:1">
+     <h2>Control de transmisión</h2>
+     <div class="info">Selecciona los mensajes que quieres mostrar en OBS.</div>
+    </div>
+    <button id="logoutButton" class="secondary">Cerrar sesión</button>
+   </div>
+  </div>
+
+  <div class="panel">
+   <h2>Mensaje actualmente destacado</h2>
+   <div id="featuredBox" class="featured">
+    <strong>No hay ningún mensaje en pantalla.</strong>
+   </div>
+   <button id="removeButton" class="danger" style="width:100%;margin-top:12px" disabled>
+    RETIRAR DE OBS
+   </button>
+  </div>
+
+  <div class="panel">
+   <h2>Mensajes recibidos</h2>
+   <p class="info">Los mensajes nuevos aparecerán aquí automáticamente. Solo se mostrarán en OBS cuando pulses DESTACAR.</p>
+   <div id="messages">
+    <p class="info">Cargando mensajes…</p>
+   </div>
+  </div>
+
+ </section>
+
+ <div id="notice" role="alert"></div>
+
+</main>
+
+<script>
+(() => {
+ const SUPABASE_URL = "https://qvjbaiuydxcvgnxvaudl.supabase.co";
+ const SUPABASE_ANON_KEY = "sb_publishable_sytKjRRv8mfMp3vlQbgNmQ_PsIlU5EO";
+
+ const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+ );
+
+ const loginPanel = document.getElementById("loginPanel");
+ const controlPanel = document.getElementById("controlPanel");
+ const loginForm = document.getElementById("loginForm");
+ const loginButton = document.getElementById("loginButton");
+ const loginError = document.getElementById("loginError");
+ const messagesBox = document.getElementById("messages");
+ const featuredBox = document.getElementById("featuredBox");
+ const removeButton = document.getElementById("removeButton");
+ const connection = document.getElementById("connection");
+ const notice = document.getElementById("notice");
+
+ let currentFeatured = null;
+ let messageChannel = null;
+ let featuredChannel = null;
+ let busy = false;
+
+ function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+   "&":"&amp;",
+   "<":"&lt;",
+   ">":"&gt;",
+   '"':"&quot;",
+   "'":"&#39;"
+  })[c]);
+ }
+
+ function showNotice(text){
+  notice.textContent = text || "";
+ }
+
+ function formatTime(value){
+  if(!value) return "";
+  return new Date(value).toLocaleString("es-MX",{
+   day:"2-digit",
+   month:"short",
+   hour:"2-digit",
+   minute:"2-digit"
+  });
+ }
+
+ function showLogin(){
+  loginPanel.classList.remove("hidden");
+  controlPanel.classList.add("hidden");
+  connection.textContent = "Sin conexión";
+ }
+
+ function showControl(){
+  loginPanel.classList.add("hidden");
+  controlPanel.classList.remove("hidden");
+  connection.textContent = "Conectando…";
+ }
+
+ async function loadMessages(){
+  messagesBox.innerHTML = '<p class="info">Cargando mensajes…</p>';
+
+  const {data,error} = await db
+   .from("live_chat_messages")
+   .select("id,display_name,body,created_at")
+   .order("created_at",{ascending:false})
+   .limit(100);
+
+  if(error){
+   messagesBox.innerHTML =
+    '<p class="info">No se pudieron consultar los mensajes. '+
+    escapeHTML(error.message)+'</p>';
+   return;
+  }
+
+  renderMessages(data || []);
+ }
+
+ function renderMessages(rows){
+  if(!rows.length){
+   messagesBox.innerHTML =
+    '<p class="info">Todavía no hay mensajes disponibles.</p>';
+   return;
+  }
+
+  messagesBox.innerHTML = rows.map(row => `
+   <article class="message">
+    <div class="message-name">${escapeHTML(row.display_name)}</div>
+    <div class="message-body">${escapeHTML(row.body)}</div>
+    <div class="message-time">${escapeHTML(formatTime(row.created_at))}</div>
+    <div class="actions">
+     <button class="primary feature-button"
+      data-id="${escapeHTML(row.id)}"
+      data-name="${escapeHTML(row.display_name)}"
+      data-body="${escapeHTML(row.body)}">
+      DESTACAR EN OBS
+     </button>
+    </div>
+   </article>
+  `).join("");
+
+  messagesBox.querySelectorAll(".feature-button").forEach(button=>{
+   button.addEventListener("click",()=>{
+    featureMessage(
+     button.dataset.id,
+     button.dataset.name,
+     button.dataset.body
+    );
+   });
+  });
+ }
+
+ async function loadFeatured(){
+  const {data,error} = await db
+   .from("live_chat_featured")
+   .select("message_id,display_name,body,is_visible,updated_at")
+   .eq("slot",1)
+   .maybeSingle();
+
+  if(error){
+   showNotice("Error al consultar el mensaje destacado: "+error.message);
+   return;
+  }
+
+  currentFeatured = data;
+  renderFeatured();
+ }
+
+ function renderFeatured(){
+  if(!currentFeatured || !currentFeatured.is_visible){
+   featuredBox.innerHTML =
+    "<strong>No hay ningún mensaje en pantalla.</strong>";
+   removeButton.disabled = true;
+   return;
+  }
+
+  featuredBox.innerHTML =
+   '<strong>EN PANTALLA</strong>'+
+   '<div class="message-name" style="margin-top:9px">'+
+   escapeHTML(currentFeatured.display_name)+'</div>'+
+   '<div class="message-body">'+
+   escapeHTML(currentFeatured.body)+'</div>';
+
+  removeButton.disabled = false;
+ }
+
+ async function featureMessage(id,name,body){
+  if(busy) return;
+
+  busy = true;
+  showNotice("");
+
+  const {error} = await db
+   .from("live_chat_featured")
+   .update({
+    message_id:String(id),
+    display_name:name,
+    body:body,
+    is_visible:true,
+    updated_at:new Date().toISOString()
+   })
+   .eq("slot",1);
+
+  busy = false;
+
+  if(error){
+   showNotice("No se pudo destacar el mensaje: "+error.message);
+   return;
+  }
+
+  await loadFeatured();
+  showNotice("Mensaje destacado correctamente.");
+ }
+
+ async function removeFeatured(){
+  if(busy || !currentFeatured) return;
+
+  busy = true;
+  showNotice("");
+
+  const {error} = await db
+   .from("live_chat_featured")
+   .update({
+    is_visible:false,
+    updated_at:new Date().toISOString()
+   })
+   .eq("slot",1);
+
+  busy = false;
+
+  if(error){
+   showNotice("No se pudo retirar el mensaje: "+error.message);
+   return;
+  }
+
+  await loadFeatured();
+  showNotice("Mensaje retirado de OBS.");
+ }
+
+ function startRealtime(){
+  if(messageChannel) db.removeChannel(messageChannel);
+  if(featuredChannel) db.removeChannel(featuredChannel);
+
+  messageChannel = db
+   .channel("control-chat-messages")
+   .on("postgres_changes",{
+    event:"INSERT",
+    schema:"public",
+    table:"live_chat_messages"
+   },()=>{
+    loadMessages();
+   })
+   .subscribe();
+
+  featuredChannel = db
+   .channel("control-featured-message")
+   .on("postgres_changes",{
+    event:"UPDATE",
+    schema:"public",
+    table:"live_chat_featured",
+    filter:"slot=eq.1"
+   },event=>{
+    currentFeatured = event.new;
+    renderFeatured();
+   })
+   .subscribe();
+
+  connection.textContent = "Panel conectado";
+ }
+
+ async function openPanel(){
+  showControl();
+  showNotice("");
+  await Promise.all([loadMessages(),loadFeatured()]);
+  startRealtime();
+ }
+
+ loginForm.addEventListener("submit",async event=>{
+  event.preventDefault();
+  loginError.textContent = "";
+  loginButton.disabled = true;
+  loginButton.textContent = "INGRESANDO…";
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  const {error} = await db.auth.signInWithPassword({
+   email,
+   password
+  });
+
+  loginButton.disabled = false;
+  loginButton.textContent = "ENTRAR AL PANEL";
+
+  if(error){
+   loginError.textContent = "No se pudo iniciar sesión: "+error.message;
+   return;
+  }
+
+  await openPanel();
+ });
+
+ removeButton.addEventListener("click",removeFeatured);
+
+ document.getElementById("logoutButton").addEventListener("click",async()=>{
+  if(messageChannel) db.removeChannel(messageChannel);
+  if(featuredChannel) db.removeChannel(featuredChannel);
+  await db.auth.signOut();
+  showLogin();
+ });
+
+ db.auth.getSession().then(async({data})=>{
+  if(data.session){
+   await openPanel();
+  }else{
+   showLogin();
+  }
+ });
+
+ db.auth.onAuthStateChange((event,session)=>{
+  if(event === "SIGNED_OUT" || !session){
+   showLogin();
+  }
+ });
+})();
+</script>
+
+</body>
+</html>
