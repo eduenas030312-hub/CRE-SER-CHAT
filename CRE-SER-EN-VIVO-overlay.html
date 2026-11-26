@@ -28,30 +28,40 @@ html, body {
   left: 50%;
   bottom: 7%;
   transform: translateX(-50%);
-  width: min(90%, 1100px);
+  width: fit-content;
+  max-width: 90%;
   display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
   animation: aparecer .35s ease-out;
 }
 
 #overlay.visible {
-  display: block;
-}
-
-.message-card {
-  background: rgba(17, 35, 48, .94);
-  border: 2px solid rgba(255,255,255,.85);
-  border-radius: 18px;
-  padding: 24px 32px;
-  box-shadow: 0 8px 30px rgba(0,0,0,.35);
-  text-align: center;
+  display: flex;
 }
 
 .name {
-  color: #8ee6c0;
-  font-size: 25px;
+  background: #8ee6c0;
+  color: #173b35;
+  font-size: 23px;
   font-weight: 800;
-  margin-bottom: 10px;
-  letter-spacing: .5px;
+  padding: 11px 22px;
+  border-radius: 12px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  box-shadow: 0 5px 15px rgba(0,0,0,.25);
+  letter-spacing: .4px;
+}
+
+.message-card {
+  background: rgba(17, 35, 48, .96);
+  border: 2px solid rgba(255,255,255,.85);
+  border-radius: 16px;
+  padding: 20px 26px;
+  width: fit-content;
+  max-width: 100%;
+  box-shadow: 0 8px 30px rgba(0,0,0,.35);
 }
 
 .body {
@@ -59,6 +69,7 @@ html, body {
   font-size: 34px;
   line-height: 1.3;
   font-weight: 600;
+  text-align: left;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -75,12 +86,13 @@ html, body {
 }
 
 @media (max-width: 700px) {
-  .message-card {
-    padding: 16px 20px;
-  }
-
   .name {
     font-size: 19px;
+    padding: 9px 16px;
+  }
+
+  .message-card {
+    padding: 15px 19px;
   }
 
   .body {
@@ -93,8 +105,8 @@ html, body {
 <body>
 
 <div id="overlay">
+  <div class="name" id="displayName"></div>
   <div class="message-card">
-    <div class="name" id="displayName"></div>
     <div class="body" id="messageBody"></div>
   </div>
 </div>
