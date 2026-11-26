@@ -122,6 +122,7 @@ jobs:
           cp index.html styles.css app.js favicon.svg _site/
           cp CRE-SER-EN-VIVO-chat.html _site/
           cp CRE-SER-EN-VIVO-control.html _site/
+          cp CRE-SER-EN-VIVO-overlay.html _site/
           cp supabase/config.js _site/supabase/
           touch _site/.nojekyll
       - name: Upload Pages artifact
